@@ -12,6 +12,14 @@ connectDB(); // Connect to MongoDB Atlas
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// CORS Middleware: Manually set headers
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  next();
+});
+
 app.use(bodyParser.json());
 
 // Authentication Routes
