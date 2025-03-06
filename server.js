@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const connectDB = require('./config/mongo');
+const swaggerDocs = require("./config/swagger");
 const authRoutes = require('./routes/authRoutes');
 const jobRoutes = require('./routes/jobRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
@@ -65,5 +66,9 @@ app.get('/users', protect, async (req, res) => {
   }
 });
 
+// Swagger setup
+swaggerDocs(app);
+
 // Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port: ${PORT}`));
+  console.log("Swagger Docs available at /api-docs");

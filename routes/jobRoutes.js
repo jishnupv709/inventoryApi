@@ -3,7 +3,43 @@ const router = express.Router();
 const Job = require('../models/job');
 const protect = require('../middleware/authMiddleware');
 
-// Create a Job (Protected)
+/**
+ * @swagger
+ * tags:
+ *   name: Jobs
+ *   description: Job CRUD Operations
+ */
+
+/**
+ * @swagger
+ * /jobs:
+ *   post:
+ *     summary: Create a new job
+ *     tags: [Jobs]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [jobTitle, location, description]
+ *             properties:
+ *               jobTitle:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Job created successfully
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error
+ */
 router.post('/', protect, async (req, res) => {
   try {
     const { jobTitle, location, description } = req.body;
@@ -18,7 +54,18 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// List all Jobs (Public)
+/**
+ * @swagger
+ * /jobs:
+ *   get:
+ *     summary: Get all jobs
+ *     tags: [Jobs]
+ *     responses:
+ *       200:
+ *         description: List of all jobs
+ *       500:
+ *         description: Server error
+ */
 router.get('/', async (req, res) => {
   try {
     const jobs = await Job.find();
@@ -28,25 +75,80 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get Job Details (Protected)
-// Instead of using a dynamic URL, use POST with a body containing the jobId.
+/**
+ * @swagger
+ * /jobs/details:
+ *   post:
+ *     summary: Get job details
+ *     tags: [Jobs]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [jobId]
+ *             properties:
+ *               jobId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Job details retrieved successfully
+ *       400:
+ *         description: Job ID is required
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Server error
+ */
 router.post('/details', protect, async (req, res) => {
   try {
-    const { jobId } = req.body; // Use jobId to match your client payload
+    const { jobId } = req.body;
     if (!jobId) return res.status(400).json({ message: 'Job ID is required' });
-    
     const job = await Job.findById(jobId);
     if (!job) return res.status(404).json({ message: 'Job not found' });
-    
     res.json(job);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-
-// Update a Job (Protected)
-// Endpoint: PUT /jobs/update with body { jobId, jobTitle, location, description }
+/**
+ * @swagger
+ * /jobs/update:
+ *   put:
+ *     summary: Update a job
+ *     tags: [Jobs]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [jobId]
+ *             properties:
+ *               jobId:
+ *                 type: string
+ *               jobTitle:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Job updated successfully
+ *       400:
+ *         description: Job ID is required
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Server error
+ */
 router.put('/update', protect, async (req, res) => {
   try {
     const { jobId, jobTitle, location, description } = req.body;
@@ -63,16 +165,40 @@ router.put('/update', protect, async (req, res) => {
   }
 });
 
-// Delete a Job (Protected)
-// Endpoint: DELETE /jobs/delete with body { jobId }
+/**
+ * @swagger
+ * /jobs/delete:
+ *   delete:
+ *     summary: Delete a job
+ *     tags: [Jobs]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [jobId]
+ *             properties:
+ *               jobId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Job removed successfully
+ *       400:
+ *         description: Job ID is required
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Server error
+ */
 router.delete('/delete', protect, async (req, res) => {
   try {
     const { jobId } = req.body;
     if (!jobId) return res.status(400).json({ message: 'Job ID is required' });
-    
     const job = await Job.findByIdAndDelete(jobId);
     if (!job) return res.status(404).json({ message: 'Job not found' });
-    
     res.json({ message: 'Job removed' });
   } catch (err) {
     res.status(500).json({ error: err.message });
