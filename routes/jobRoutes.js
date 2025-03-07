@@ -221,7 +221,7 @@ router.put('/update', protect, async (req, res) => {
  *                 type: string
  *     responses:
  *       200:
- *         description: Job removed successfully
+ *         description: Job removed successfully along with its related applications
  *       400:
  *         description: Job ID is required
  *       404:
@@ -233,12 +233,19 @@ router.delete('/delete', protect, async (req, res) => {
   try {
     const { jobId } = req.body;
     if (!jobId) return res.status(400).json({ message: 'Job ID is required' });
+    
+    // Delete the job
     const job = await Job.findByIdAndDelete(jobId);
     if (!job) return res.status(404).json({ message: 'Job not found' });
-    res.json({ message: 'Job removed' });
+    
+    // Delete all applications related to this job
+    await Application.deleteMany({ job: jobId });
+    
+    res.json({ message: 'Job removed along with related applications' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;
