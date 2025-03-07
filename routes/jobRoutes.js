@@ -75,6 +75,41 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /jobs/new:
+ *   get:
+ *     summary: Get new jobs (jobs not applied by the user)
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of new jobs
+ *       500:
+ *         description: Server error
+ */
+router.get('/new', protect, async (req, res) => {
+  try {
+    // Get the logged-in user's ID from the authentication middleware
+    const userId = req.user._id;
+
+    // Retrieve all applications made by this user
+    const appliedApplications = await Application.find({ applicant: userId }).select('job');
+
+    // Extract the job IDs that the user has applied for
+    const appliedJobIds = appliedApplications.map(application => application.job);
+
+    // Find jobs that are not in the list of applied job IDs
+    const newJobs = await Job.find({ _id: { $nin: appliedJobIds } });
+
+    res.json(newJobs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /**
  * @swagger
  * /jobs/details:
